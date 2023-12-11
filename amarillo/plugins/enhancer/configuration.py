@@ -8,6 +8,7 @@ from amarillo.app.models.Carpool import Carpool
 from amarillo.app.services import stops
 from amarillo.app.services import trips
 from amarillo.app.services.carpools import CarpoolService
+from amarillo.app.services import gtfs_generator
 
 from amarillo.app.configuration import configure_services
 
@@ -49,3 +50,4 @@ def configure_enhancer_services():
 
     logger.info("Restored carpools: %s", container['carpools'].get_all_ids())
     logger.info("Starting scheduler")
+    gtfs_generator.start_schedule()
