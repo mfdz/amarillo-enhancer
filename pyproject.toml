@@ -1,7 +1,8 @@
 [project]
 name = "amarillo-enhancer"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
     "amarillo-core",
     "watchdog",
+    "schedule==1.2.1",
 ]
