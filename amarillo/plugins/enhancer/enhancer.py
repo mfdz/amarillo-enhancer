@@ -1,24 +1,17 @@
 import json
-import time
+from threading import Thread
 import logging
 import logging.config
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-from enhancer_configuration import configure_enhancer_services
+from amarillo.plugins.enhancer.configuration import configure_enhancer_services
 from amarillo.app.utils.container import container
 from amarillo.app.models.Carpool import Carpool
 from amarillo.app.utils.utils import agency_carpool_ids_from_filename
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger("enhancer")
-
-logger.info("Hello Enhancer")
-
-configure_enhancer_services()
-
-observer = Observer()  # Watch Manager
-
 
 class EventHandler(FileSystemEventHandler):
     # TODO FG HB should watch for both carpools and agencies
@@ -47,24 +40,39 @@ class EventHandler(FileSystemEventHandler):
             logger.exception("Eventhandler on_deleted encountered exception")
 
 
-observer.schedule(EventHandler(), 'data/carpool', recursive=True)
-observer.start()
+def run_enhancer():
+    logger.info("Hello Enhancer")
 
-import time
+    configure_enhancer_services()
 
-try:
-    # TODO FG Is this really needed?
-    cnt = 0
-    ENHANCER_LOG_INTERVAL_IN_S = 600
-    while True:
-        if cnt == ENHANCER_LOG_INTERVAL_IN_S:
-            logger.debug("Currently stored carpool ids: %s", container['carpools'].get_all_ids())
-            cnt = 0
+    observer = Observer()  # Watch Manager
 
-        time.sleep(1)
-        cnt += 1
-finally:
-    observer.stop()
-    observer.join()
+    observer.schedule(EventHandler(), 'data/carpool', recursive=True)
+    observer.start()
 
-    logger.info("Goodbye Enhancer")
+    import time
+
+    try:
+        # TODO FG Is this really needed?
+        cnt = 0
+        ENHANCER_LOG_INTERVAL_IN_S = 600
+        while True:
+            if cnt == ENHANCER_LOG_INTERVAL_IN_S:
+                logger.debug("Currently stored carpool ids: %s", container['carpools'].get_all_ids())
+                cnt = 0
+
+            time.sleep(1)
+            cnt += 1
+    finally:
+        observer.stop()
+        observer.join()
+
+        logger.info("Goodbye Enhancer")
+
+def setup(app):
+    thread = Thread(target=run_enhancer)
+    thread.start()
+
+
+if __name__ == "__main__":
+    run_enhancer()
