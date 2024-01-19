@@ -6,8 +6,8 @@ from glob import glob
 
 from amarillo.app.models.Carpool import Carpool
 from amarillo.app.services import stops
-from amarillo.app.services import trips
-from amarillo.app.services.carpools import CarpoolService
+from amarillo.plugins.enhancer.services import trips
+from amarillo.plugins.enhancer.services.carpools import CarpoolService
 from amarillo.plugins.enhancer.services import gtfs_generator
 
 from amarillo.app.configuration import configure_services
