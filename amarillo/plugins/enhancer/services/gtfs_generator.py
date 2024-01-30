@@ -1,7 +1,7 @@
-from amarillo.app.models.Carpool import Region
+from amarillo.models.Carpool import Region
 from amarillo.plugins.enhancer.services.gtfs_export import GtfsExport, GtfsFeedInfo, GtfsAgency
-from amarillo.app.services.gtfs import GtfsRtProducer
-from amarillo.app.utils.container import container
+from amarillo.services.gtfs import GtfsRtProducer
+from amarillo.utils.container import container
 from glob import glob
 import json
 import schedule
