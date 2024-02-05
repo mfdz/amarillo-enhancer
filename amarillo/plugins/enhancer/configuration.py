@@ -5,7 +5,7 @@ import logging
 from glob import glob
 
 from amarillo.models.Carpool import Carpool
-from amarillo.services import stops
+from amarillo.plugins.enhancer.services import stops
 from amarillo.plugins.enhancer.services import trips
 from amarillo.plugins.enhancer.services.carpools import CarpoolService
 from amarillo.plugins.enhancer.services import gtfs_generator
