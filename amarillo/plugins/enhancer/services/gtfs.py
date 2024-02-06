@@ -1,5 +1,5 @@
-import amarillo.services.gtfsrt.gtfs_realtime_pb2 as gtfs_realtime_pb2
-import amarillo.services.gtfsrt.realtime_extension_pb2 as mfdzrte
+import amarillo.plugins.enhancer.services.gtfsrt.gtfs_realtime_pb2 as gtfs_realtime_pb2
+import amarillo.plugins.enhancer.services.gtfsrt.realtime_extension_pb2 as mfdzrte
 from amarillo.plugins.enhancer.services.gtfs_constants import *
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.json_format import ParseDict
@@ -49,11 +49,11 @@ class GtfsRtProducer():
 		trips.extend(self._get_deleted(bbox))
 		trip_updates = []
 		for num, trip in enumerate(trips):
-   			trip_updates.append( {
-   				'id': f'carpool-update-{num}', 
-  				'tripUpdate': trip
-  				}
-  			)
+			trip_updates.append( {
+				'id': f'carpool-update-{num}', 
+				'tripUpdate': trip
+				}
+			)
 		return trip_updates
 
 	def _get_deleted(self, bbox = None):
