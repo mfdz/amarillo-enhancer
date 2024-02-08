@@ -8,7 +8,7 @@ import logging
 import re
 
 from amarillo.utils.utils import assert_folder_exists
-from amarillo.models.gtfs import GtfsTimeDelta, GtfsFeedInfo, GtfsAgency, GtfsRoute, GtfsStop, GtfsStopTime, GtfsTrip, GtfsCalendar, GtfsCalendarDate, GtfsShape
+from amarillo.plugins.enhancer.models.gtfs import GtfsTimeDelta, GtfsFeedInfo, GtfsAgency, GtfsRoute, GtfsStop, GtfsStopTime, GtfsTrip, GtfsCalendar, GtfsCalendarDate, GtfsShape
 from amarillo.plugins.enhancer.services.stops import is_carpooling_stop
 from amarillo.plugins.enhancer.services.gtfs_constants import *
 
