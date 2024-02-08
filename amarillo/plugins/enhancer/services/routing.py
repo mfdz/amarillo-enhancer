@@ -43,5 +43,5 @@ class RoutingService():
         for point in points:
             locations += "point={0}%2C{1}&".format(point.y, point.x)
             
-        return "{0}/route?{1}instructions={2}&calc_points={3}&points_encoded=false".format(
+        return "{0}/route?{1}instructions={2}&calc_points={3}&points_encoded=false&profile=car".format(
             self.gh_service_url, locations, instructions, calc_points)    
