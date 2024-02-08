@@ -70,7 +70,7 @@ def run_enhancer():
         logger.info("Goodbye Enhancer")
 
 def setup(app):
-    thread = Thread(target=run_enhancer)
+    thread = Thread(target=run_enhancer, daemon=True)
     thread.start()
 
 
