@@ -27,7 +27,11 @@ def configure_container():
 
 def configure_enhancer_services():
     configure_services()
-    configure_container()
+
+    # configure_container may have been called already by an exporter, no need to run it again
+    if 'stops_store' not in container:
+        configure_container()
+    else: logger.info("Container already configured")
 
     logger.info("Restore carpools...")
 
@@ -47,5 +51,3 @@ def configure_enhancer_services():
                 container['carpools'].delete(carpool.agency, carpool.id)
 
     logger.info("Restored carpools: %s", container['carpools'].get_all_ids())
-    logger.info("Starting scheduler")
-    gtfs_generator.start_schedule()
