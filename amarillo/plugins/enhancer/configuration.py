@@ -9,27 +9,25 @@ from amarillo.plugins.enhancer.services import stops
 from amarillo.plugins.enhancer.services import trips
 from amarillo.plugins.enhancer.services.carpools import CarpoolService
 from amarillo.plugins.enhancer.services import gtfs_generator
-
+from amarillo.services.config import config
 from amarillo.configuration import configure_services
 
 logger = logging.getLogger(__name__)
 
-
-def configure_enhancer_services():
-    configure_services()
-
+def configure_container():
     logger.info("Load stops...")
-    stop_sources = [
-        {"url": "https://datahub.bbnavi.de/export/rideshare_points.geojson", "vicinity": 50},
-        {"url": "https://data.mfdz.de/mfdz/stops/stops_zhv.csv", "vicinity": 50},
-        {"url": "https://data.mfdz.de/mfdz/stops/parkings_osm.csv", "vicinity": 500},      
-    ]
-    stop_store = stops.StopsStore(stop_sources)
+    with open(config.stop_sources_file) as stop_sources_file:
+        stop_sources = json.load(stop_sources_file)
+        stop_store = stops.StopsStore(stop_sources)
     
     stop_store.load_stop_sources()
     container['stops_store'] = stop_store
     container['trips_store'] = trips.TripStore(stop_store)
     container['carpools'] = CarpoolService(container['trips_store'])
+
+def configure_enhancer_services():
+    configure_services()
+    configure_container()
 
     logger.info("Restore carpools...")
 
