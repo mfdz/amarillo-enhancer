@@ -1,5 +1,6 @@
 from amarillo.plugins.enhancer.models.gtfs import GtfsTimeDelta, GtfsStopTime
 from amarillo.models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType
+from amarillo.services.config import config
 from amarillo.plugins.enhancer.services.gtfs_constants import *
 from amarillo.plugins.enhancer.services.routing import RoutingService, RoutingException
 from amarillo.plugins.enhancer.services.stops import is_carpooling_stop
@@ -198,7 +199,7 @@ class TripTransformer:
     REPLACEMENT_STOPS_SERACH_RADIUS_IN_M = 1000
     SIMPLIFY_TOLERANCE = 0.0001
 
-    router = RoutingService()
+    router = RoutingService(config.graphhopper_base_url)
 
     def __init__(self, stops_store):
         self.stops_store = stops_store
