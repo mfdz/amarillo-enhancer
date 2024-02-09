@@ -14,7 +14,9 @@ from amarillo.configuration import configure_services
 
 logger = logging.getLogger(__name__)
 
-def configure_container():
+def configure_enhancer_services():
+    configure_services()
+
     logger.info("Load stops...")
     with open(config.stop_sources_file) as stop_sources_file:
         stop_sources = json.load(stop_sources_file)
@@ -24,14 +26,6 @@ def configure_container():
     container['stops_store'] = stop_store
     container['trips_store'] = trips.TripStore(stop_store)
     container['carpools'] = CarpoolService(container['trips_store'])
-
-def configure_enhancer_services():
-    configure_services()
-
-    # configure_container may have been called already by an exporter, no need to run it again
-    if 'stops_store' not in container:
-        configure_container()
-    else: logger.info("Container already configured")
 
     logger.info("Restore carpools...")
 
