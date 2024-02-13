@@ -1,5 +1,5 @@
 from amarillo.plugins.enhancer.models.gtfs import GtfsTimeDelta, GtfsStopTime
-from amarillo.models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType
+from amarillo.models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType, Driver, RidesharingInfo
 from amarillo.services.config import config
 from amarillo.plugins.enhancer.services.gtfs_constants import *
 from amarillo.plugins.enhancer.services.routing import RoutingService, RoutingException
@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Trip:
 
-    # TODO: add driver attributes, additional ridesharing info
-    def __init__(self, trip_id, route_name, headsign, url, calendar, departureTime, path, agency, lastUpdated, stop_times, bbox):
+    def __init__(self, trip_id, route_name, headsign, url, calendar, departureTime, path, agency, lastUpdated, stop_times, driver: Driver, additional_ridesharing_info: RidesharingInfo, bbox):
         if isinstance(calendar, set):
             self.runs_regularly = True
             self.weekdays = [ 
@@ -44,6 +43,8 @@ class Trip:
         self.stops = []
         self.lastUpdated = lastUpdated
         self.stop_times = stop_times
+        self.driver = driver
+        self.additional_ridesharing_info = additional_ridesharing_info
         self.bbox = bbox
         self.route_name = route_name
         self.trip_headsign = headsign
@@ -204,7 +205,7 @@ class TripTransformer:
     def __init__(self, stops_store):
         self.stops_store = stops_store
 
-    def transform_to_trip(self, carpool):
+    def transform_to_trip(self, carpool : Carpool):
         stop_times = self._convert_stop_times(carpool)
         route_name = carpool.stops[0].name + " nach " + carpool.stops[-1].name
         headsign= carpool.stops[-1].name
@@ -216,8 +217,7 @@ class TripTransformer:
             max([pt[0] for pt in path.coordinates]),
             max([pt[1] for pt in path.coordinates]))
             
-        # TODO: pass driver and ridesharing info object to the Trip constructor
-        trip = Trip(trip_id, route_name, headsign, str(carpool.deeplink), carpool.departureDate, carpool.departureTime, carpool.path, carpool.agency, carpool.lastUpdated, stop_times, bbox)
+        trip = Trip(trip_id, route_name, headsign, str(carpool.deeplink), carpool.departureDate, carpool.departureTime, carpool.path, carpool.agency, carpool.lastUpdated, stop_times, carpool.driver, carpool.additional_ridesharing_info, bbox)
 
         return trip
 
