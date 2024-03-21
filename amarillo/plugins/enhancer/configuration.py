@@ -14,7 +14,15 @@ from amarillo.configuration import configure_services
 
 logger = logging.getLogger(__name__)
 
+enhancer_configured = False
+
 def configure_enhancer_services():
+    #Make sure configuration only happens once
+    global enhancer_configured 
+    if enhancer_configured:
+        logger.info("Enhancer is already configured")
+        return
+
     configure_services()
 
     logger.info("Load stops...")
@@ -45,5 +53,5 @@ def configure_enhancer_services():
                 container['carpools'].delete(carpool.agency, carpool.id)
 
     logger.info("Restored carpools: %s", container['carpools'].get_all_ids())
-    logger.info("Starting scheduler")
-    gtfs_generator.start_schedule()
+
+    enhancer_configured = True
