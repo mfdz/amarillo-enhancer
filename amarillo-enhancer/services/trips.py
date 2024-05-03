@@ -73,7 +73,7 @@ class Trip:
         return self.bbox.intersects(box(*bbox))
 
 
-class TripStore():
+class TripStoreX():
     """
     TripStore maintains the currently valid trips. A trip is a
     carpool offer enhanced with all stops this 
@@ -91,6 +91,7 @@ class TripStore():
         self.recent_trips = {}
 
 
+    #TODO: move file handling to main Amarillo
     def put_carpool(self, carpool: Carpool):
         """
         Adds carpool to the TripStore.
