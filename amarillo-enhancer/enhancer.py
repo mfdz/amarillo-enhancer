@@ -71,7 +71,7 @@ app = FastAPI(title="Amarillo Enhancer",
 configure_enhancer_services()
 stops_store = container['stops_store']
 transformer : TripTransformer = TripTransformer(stops_store)
-logger.info(transformer)
+# logger.info(transformer)
 
 @app.post("/",
              operation_id="enhancecarpool",

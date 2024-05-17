@@ -1,9 +1,9 @@
-from amarillo.plugins.enhancer.models.gtfs import GtfsTimeDelta, GtfsStopTime
-from amarillo.models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType, Driver, RidesharingInfo
-from amarillo.services.config import config
-from amarillo.plugins.enhancer.services.gtfs_constants import *
-from amarillo.plugins.enhancer.services.routing import RoutingService, RoutingException
-from amarillo.plugins.enhancer.services.stops import is_carpooling_stop
+from ..models.gtfs import GtfsTimeDelta, GtfsStopTime
+from ..models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType, Driver, RidesharingInfo
+from ..services.config import config
+from ..services.gtfs_constants import *
+from ..services.routing import RoutingService, RoutingException
+from ..services.stops import is_carpooling_stop
 from amarillo.utils.utils import assert_folder_exists, is_older_than_days, yesterday, geodesic_distance_in_m
 from shapely.geometry import Point, LineString, box
 from geojson_pydantic.geometries import LineString as GeoJSONLineString
