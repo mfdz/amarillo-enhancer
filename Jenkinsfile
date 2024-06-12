@@ -51,7 +51,7 @@ pipeline {
         }
         stage('Build docker image') {
             when {
-                branch 'main'
+                anyOf { branch 'main'; branch 'dev' }
             }
             steps {
                 echo 'Building image'
@@ -62,7 +62,7 @@ pipeline {
         }
         stage('Push image to container registry') {
             when {
-                branch 'main'
+                anyOf { branch 'main'; branch 'dev' }
             }
             steps {
                 echo 'Pushing image to registry'
