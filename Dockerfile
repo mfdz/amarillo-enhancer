@@ -17,6 +17,9 @@ COPY ./logging.conf /app
 ENV MODULE_NAME=amarillo-enhancer.enhancer
 ENV MAX_WORKERS=1
 
+RUN useradd amarillo
+USER amarillo
+
 # This image inherits uvicorn-gunicorn's CMD. If you'd like to start uvicorn, use this instead
 # CMD ["uvicorn", "amarillo.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
