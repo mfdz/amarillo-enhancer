@@ -2,13 +2,8 @@
 from amarillo.utils.container import container
 import json
 import logging
-from glob import glob
 
-from amarillo.models.Carpool import Carpool
-from .services import stops
-from .services import trips
-from .services.carpools import CarpoolService
-from .services.config import config
+from amarillo_stops import stops
 from amarillo.utils.utils import assert_folder_exists
 from .services.trips import TripTransformer
 from amarillo.services.agencies import AgencyService

@@ -1,3 +1,4 @@
 amarillo
+amarillo-stops
 watchdog==3.0.0
 schedule==1.2.1

@@ -3,7 +3,7 @@ from ..models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, Pic
 from ..services.config import config
 from ..services.gtfs_constants import *
 from ..services.routing import RoutingService, RoutingException
-from ..services.stops import is_carpooling_stop
+from amarillo_stops.stops import is_carpooling_stop
 from amarillo.utils.utils import assert_folder_exists, is_older_than_days, yesterday, geodesic_distance_in_m
 from shapely.geometry import Point, LineString, box
 from geojson_pydantic.geometries import LineString as GeoJSONLineString
