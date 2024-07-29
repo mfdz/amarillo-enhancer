@@ -1,9 +1,14 @@
 pipeline {
-    agent any
+    agent { label 'builtin' }
     environment {
         GITEA_CREDS = credentials('AMARILLO-JENKINS-GITEA-USER')
         PYPI_CREDS = credentials('AMARILLO-JENKINS-PYPI-USER')
         TWINE_REPO_URL = "https://git.gerhardt.io/api/packages/amarillo/pypi"
+        DOCKER_REGISTRY_URL = 'https://git.gerhardt.io'
+        OWNER = 'amarillo'
+        IMAGE_NAME = 'amarillo-enhancer'
+        DISTRIBUTION = '0.2'
+        TAG = "${DISTRIBUTION}.${BUILD_NUMBER}"
     }
     stages {
         stage('Create virtual environment') {
@@ -42,6 +47,32 @@ pipeline {
             }
             steps {
                 sh 'python3 -m twine upload --verbose --username $PYPI_CREDS_USR --password $PYPI_CREDS_PSW ./dist/*'              
+            }
+        }
+        stage('Build docker image') {
+            when {
+                anyOf { branch 'main'; branch 'dev' }
+            }
+            steps {
+                echo 'Building image'
+                script {
+                    docker.build("${OWNER}/${IMAGE_NAME}:${TAG}")
+                }
+            }
+        }
+        stage('Push image to container registry') {
+            when {
+                anyOf { branch 'main'; branch 'dev' }
+            }
+            steps {
+                echo 'Pushing image to registry'
+                script {
+                    docker.withRegistry(DOCKER_REGISTRY_URL, 'AMARILLO-JENKINS-GITEA-USER'){
+                        def image = docker.image("${OWNER}/${IMAGE_NAME}:${TAG}")
+                        image.push()
+                        image.push('latest')
+                    }
+                }
             }
         }
     }
