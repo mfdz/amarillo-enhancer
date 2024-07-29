@@ -17,6 +17,10 @@ COPY ./logging.conf /app
 ENV MODULE_NAME=amarillo-enhancer.enhancer
 ENV MAX_WORKERS=1
 
+# Create the error.log, otherwise we get a permission error when we try to write to it
+RUN touch /app/error.log
+RUN chmod 777 /app/error.log
+
 RUN useradd amarillo
 USER amarillo
 
