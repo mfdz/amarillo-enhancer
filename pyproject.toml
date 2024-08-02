@@ -1,6 +1,6 @@
 [project]
 name = "amarillo-enhancer"
-version = "0.0.6"
+version = "2.0.0"
 dependencies = [
     "amarillo",
     "amarillo-stops",
