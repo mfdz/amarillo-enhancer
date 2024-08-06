@@ -7,7 +7,7 @@ pipeline {
         DOCKER_REGISTRY_URL = 'https://git.gerhardt.io'
         OWNER = 'amarillo'
         IMAGE_NAME = 'amarillo-enhancer'
-        DISTRIBUTION = '2.0.0'
+        DISTRIBUTION = '2.0.1'
         TAG = "${DISTRIBUTION}-${BUILD_NUMBER}"
     }
     stages {
@@ -46,7 +46,7 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'python3 -m twine upload --verbose --username $PYPI_CREDS_USR --password $PYPI_CREDS_PSW ./dist/*'              
+                sh 'python3 -m twine upload --skip-existing --verbose --username $PYPI_CREDS_USR --password $PYPI_CREDS_PSW ./dist/*'              
             }
         }
         stage('Build docker image') {
