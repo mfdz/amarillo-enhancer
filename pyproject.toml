@@ -6,10 +6,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "amarillo",
-    "amarillo-stops",
-    "watchdog",
-    "schedule==1.2.1",
+    "amarillo-stops"
 ]
-
 [tool.setuptools.packages]
 find = {}

@@ -4,7 +4,6 @@ from ..services.config import config
 from ..services.gtfs_constants import *
 from ..services.routing import RoutingService, RoutingException
 from amarillo_stops.stops import is_carpooling_stop
-from amarillo.utils.utils import assert_folder_exists, is_older_than_days, yesterday, geodesic_distance_in_m
 from shapely.geometry import Point, LineString, box
 from geojson_pydantic.geometries import LineString as GeoJSONLineString
 from datetime import datetime, timedelta
@@ -71,131 +70,6 @@ class Trip:
 
     def intersects(self, bbox):
         return self.bbox.intersects(box(*bbox))
-
-
-class TripStoreX():
-    """
-    TripStore maintains the currently valid trips. A trip is a
-    carpool offer enhanced with all stops this 
-
-    Attributes:
-        trips           Dict of currently valid trips.
-        deleted_trips   Dict of recently deleted trips.
-    """
-
-    def __init__(self, stops_store):
-        self.transformer = TripTransformer(stops_store)
-        self.stops_store = stops_store
-        self.trips = {}
-        self.deleted_trips = {}
-        self.recent_trips = {}
-
-
-    #TODO: move file handling to main Amarillo
-    def put_carpool(self, carpool: Carpool):
-        """
-        Adds carpool to the TripStore.
-        """
-        id = "{}:{}".format(carpool.agency, carpool.id)
-        filename = f'data/enhanced/{carpool.agency}/{carpool.id}.json'
-        try:
-            existing_carpool = self._load_carpool_if_exists(carpool.agency, carpool.id)
-            if existing_carpool and existing_carpool.lastUpdated == carpool.lastUpdated:
-                enhanced_carpool = existing_carpool
-            else:
-                if len(carpool.stops) < 2 or self.distance_in_m(carpool) < 1000:
-                    logger.warning("Failed to add carpool %s:%s to TripStore, distance too low", carpool.agency, carpool.id)
-                    self.handle_failed_carpool_enhancement(carpool)
-                    return
-                enhanced_carpool = self.transformer.enhance_carpool(carpool)
-                # TODO should only store enhanced_carpool, if it has 2 or more stops
-                assert_folder_exists(f'data/enhanced/{carpool.agency}/')
-                with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(enhanced_carpool.json())
-                logger.info("Added enhanced carpool %s:%s", carpool.agency, carpool.id)
-            
-            return self._load_as_trip(enhanced_carpool)
-        except RoutingException as err:
-            logger.warning("Failed to add carpool %s:%s to TripStore due to RoutingException %s", carpool.agency, carpool.id, getattr(err, 'message', repr(err)))
-            self.handle_failed_carpool_enhancement(carpool)
-        except Exception as err:
-            logger.error("Failed to add carpool %s:%s to TripStore.", carpool.agency, carpool.id, exc_info=True)
-            self.handle_failed_carpool_enhancement(carpool)
-
-    def handle_failed_carpool_enhancement(sellf, carpool: Carpool):
-        assert_folder_exists(f'data/failed/{carpool.agency}/')
-        with open(f'data/failed/{carpool.agency}/{carpool.id}.json', 'w', encoding='utf-8') as f:
-            f.write(carpool.json())
-
-    def distance_in_m(self, carpool):
-        if len(carpool.stops) < 2:
-            return 0
-        s1 = carpool.stops[0]
-        s2 = carpool.stops[-1]
-        return geodesic_distance_in_m((s1.lon, s1.lat),(s2.lon, s2.lat)) 
-
-    def recently_added_trips(self):
-        return list(self.recent_trips.values())
-
-    def recently_deleted_trips(self):
-        return list(self.deleted_trips.values())
-
-    def _load_carpool_if_exists(self, agency_id: str, carpool_id: str):
-        if carpool_exists(agency_id, carpool_id, 'data/enhanced'):
-            try:
-                return load_carpool(agency_id, carpool_id, 'data/enhanced')
-            except Exception as e:
-                # An error on restore could be caused by model changes, 
-                # in such a case, it need's to be recreated
-                logger.warning("Could not restore enhanced trip %s:%s, reason: %s", agency_id, carpool_id, repr(e))
-
-        return None
-
-    def _load_as_trip(self, carpool: Carpool):
-        trip = self.transformer.transform_to_trip(carpool)
-        id = trip.trip_id
-        self.trips[id] = trip
-        if not is_older_than_days(carpool.lastUpdated, 1):
-            self.recent_trips[id] = trip
-        logger.debug("Added trip %s", id)
-
-        return trip
-
-    def delete_carpool(self, agency_id: str, carpool_id: str):
-        """
-            Deletes carpool from the TripStore.
-        """
-        agencyScopedCarpoolId = f"{agency_id}:{carpool_id}"
-        trip_to_be_deleted = self.trips.get(agencyScopedCarpoolId)
-        if trip_to_be_deleted:
-            self.deleted_trips[agencyScopedCarpoolId] = trip_to_be_deleted
-            del self.trips[agencyScopedCarpoolId]
-        
-        if self.recent_trips.get(agencyScopedCarpoolId):
-            del self.recent_trips[agencyScopedCarpoolId]
-
-        if carpool_exists(agency_id, carpool_id):
-            remove_carpool_file(agency_id, carpool_id)
-            
-        logger.debug("Deleted trip %s", id)
-
-    def unflag_unrecent_updates(self):
-        """
-        Trips that were last updated before yesterday, are not recent
-        any longer. As no updates need to be sent for them any longer,
-        they will be removed from recent recent_trips and deleted_trips.
-        """
-        for key in list(self.recent_trips):
-            t = self.recent_trips.get(key)
-            if t and t.lastUpdated.date() < yesterday():
-                del self.recent_trips[key]
-
-        for key in list(self.deleted_trips):
-            t = self.deleted_trips.get(key)
-            if t and t.lastUpdated.date() < yesterday():
-                del self.deleted_trips[key]
-
-
 class TripTransformer:
     REPLACE_CARPOOL_STOPS_BY_CLOSEST_TRANSIT_STOPS = True
     REPLACEMENT_STOPS_SERACH_RADIUS_IN_M = 1000
@@ -364,15 +238,3 @@ class TripTransformer:
         
     def _is_pickup_stop(self, current_stop, total_distance):
         return current_stop["distance"] < 0.5 * total_distance
-
-def load_carpool(agency_id: str, carpool_id: str, folder: str ='data/enhanced') -> Carpool:
-    with open(f'{folder}/{agency_id}/{carpool_id}.json', 'r', encoding='utf-8') as f:
-        dict = json.load(f)
-        carpool = Carpool(**dict)
-    return carpool
-
-def carpool_exists(agency_id: str, carpool_id: str, folder: str ='data/enhanced'):
-    return os.path.exists(f"{folder}/{agency_id}/{carpool_id}.json")
-
-def remove_carpool_file(agency_id: str, carpool_id: str, folder: str ='data/enhanced'):
-    return os.remove(f"{folder}/{agency_id}/{carpool_id}.json")

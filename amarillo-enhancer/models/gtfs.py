@@ -1,4 +1,3 @@
-# TODO: move to enhancer
 from collections import namedtuple
 from datetime import timedelta
 
