@@ -5,6 +5,7 @@ import logging
 
 from amarillo_stops import stops
 from .services.trips import TripTransformer
+from .services.config import config
 from amarillo.services.agencies import AgencyService
 from amarillo.services.regions import RegionService
 
@@ -21,8 +22,8 @@ def configure_enhancer_services():
     global transformer
     configure_services()
 
-    logger.info("Load stops...")
-    with open('data/stop_sources.json') as stop_sources_file:
+    logger.info("Load stops from %s", config.stop_sources_file)
+    with open(config.stop_sources_file) as stop_sources_file:
         stop_sources = json.load(stop_sources_file)
         stop_store = stops.StopsStore(stop_sources)
     
