@@ -1,2 +1,4 @@
-amarillo
+amarillo>=2.0.1
 amarillo-stops
+shapely==2.0.2
+numpy==1.26.4
