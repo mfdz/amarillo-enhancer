@@ -53,7 +53,7 @@ Activate the environment:
 
 Install the dependencies: `pip install -r requirements.txt`.
 
-Run with `uvicorn amarillo-enhancer.enhancer:app`. 
+Run with `uvicorn amarillo-enhancer.enhancer:app --port 8001`. 
 
 In development, you can use `--reload`. Uvicorn can be configured as normal by passing in arguments such as `--port 8001` to change the port number.
 
