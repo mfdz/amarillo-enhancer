@@ -1,10 +1,13 @@
 from .models.Carpool import Carpool
 from .services.trips import TripTransformer
+from .services.routing import RoutingException
 import logging
 import logging.config
-from fastapi import FastAPI, status, Body
+from fastapi import FastAPI, status, Body, HTTPException
 from .configuration import configure_enhancer_services
 from amarillo.utils.container import container
+from amarillo.utils.utils import carpool_distance_in_m
+
 
 logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger("enhancer")
@@ -61,8 +64,24 @@ transformer : TripTransformer = TripTransformer(stops_store)
 #TODO: add examples
 async def post_carpool(carpool: Carpool = Body(...)) -> Carpool:
 
+    if len(carpool.stops) < 2 or carpool_distance_in_m(carpool) < 1000:
+        raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail=f"Failed to add carpool {carpool.agency}:{carpool.id}: distance too low")
+
     logger.info(f"POST trip {carpool.agency}:{carpool.id}.")
+    try:
+        enhanced_carpool = transformer.enhance_carpool(carpool)
 
-    enhanced = transformer.enhance_carpool(carpool)
+        if len(enhanced_carpool.stops) < 2:
+            raise HTTPException(
+                status_code=status.HTTP_424_FAILED_DEPENDENCY,
+                detail="Failed to add carpool %s: less than two stops after enhancement")
 
-    return enhanced
+    except RoutingException as err:
+        raise HTTPException(
+        status_code=status.HTTP_424_FAILED_DEPENDENCY,
+        detail=repr(err),
+    )
+
+    return enhanced_carpool
