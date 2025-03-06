@@ -1,5 +1,5 @@
 from ..models.gtfs import GtfsTimeDelta, GtfsStopTime
-from ..models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType, Driver, RidesharingInfo
+from amarillo.models.Carpool import MAX_STOPS_PER_TRIP, Carpool, Weekday, StopTime, PickupDropoffType, Driver, RidesharingInfo
 from ..services.config import config
 from ..services.gtfs_constants import *
 from ..services.routing import RoutingService, RoutingException

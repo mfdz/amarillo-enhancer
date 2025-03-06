@@ -1,4 +1,4 @@
-from .models.Carpool import Carpool
+from amarillo.models.Carpool import Carpool
 from .services.trips import TripTransformer
 from .services.routing import RoutingException
 import logging
