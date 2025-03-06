@@ -13,63 +13,6 @@ import json
 import logging
 
 logger = logging.getLogger(__name__)
-
-class Trip:
-
-    def __init__(self, trip_id, route_name, headsign, url, calendar, departureTime, path, agency, lastUpdated, stop_times, driver: Driver, additional_ridesharing_info: RidesharingInfo, bbox):
-        if isinstance(calendar, set):
-            self.runs_regularly = True
-            self.weekdays = [ 
-                1 if Weekday.monday in calendar else 0,
-                1 if Weekday.tuesday in calendar else 0,
-                1 if Weekday.wednesday in calendar else 0,
-                1 if Weekday.thursday in calendar else 0,
-                1 if Weekday.friday in calendar else 0,
-                1 if Weekday.saturday in calendar else 0,
-                1 if Weekday.sunday in calendar else 0,
-            ]
-            start_in_day = self._total_seconds(departureTime)
-        else:
-            self.start = datetime.combine(calendar, departureTime)    
-            self.runs_regularly = False
-            self.weekdays = [0,0,0,0,0,0,0]
-
-        self.start_time = departureTime
-        self.path = path   
-        self.trip_id = trip_id
-        self.url = url
-        self.agency = agency
-        self.stops = []
-        self.lastUpdated = lastUpdated
-        self.stop_times = stop_times
-        self.driver = driver
-        self.additional_ridesharing_info = additional_ridesharing_info
-        self.bbox = bbox
-        self.route_name = route_name
-        self.trip_headsign = headsign
-
-    def path_as_line_string(self):
-        return self.path
-    
-    def _total_seconds(self, instant):
-        return instant.hour * 3600 + instant.minute * 60 + instant.second
-
-    def start_time_str(self):
-        return self.start_time.strftime("%H:%M:%S")
-
-    def next_trip_dates(self, start_date, day_count=14):
-        if self.runs_regularly:
-            for single_date in (start_date + timedelta(n) for n in range(day_count)):
-                if self.weekdays[single_date.weekday()]==1:
-                    yield single_date.strftime("%Y%m%d")
-        else:
-            yield self.start.strftime("%Y%m%d")
-
-    def route_long_name(self):
-        return self.route_name
-
-    def intersects(self, bbox):
-        return self.bbox.intersects(box(*bbox))
 class TripTransformer:
     REPLACE_CARPOOL_STOPS_BY_CLOSEST_TRANSIT_STOPS = True
     REPLACEMENT_STOPS_SERACH_RADIUS_IN_M = 1000
@@ -79,22 +22,6 @@ class TripTransformer:
 
     def __init__(self, stops_store):
         self.stops_store = stops_store
-
-    def transform_to_trip(self, carpool : Carpool):
-        stop_times = self._convert_stop_times(carpool)
-        route_name = carpool.stops[0].name + " nach " + carpool.stops[-1].name
-        headsign= carpool.stops[-1].name
-        trip_id = self._trip_id(carpool)
-        path = carpool.path
-        bbox = box(
-            min([pt[0] for pt in path.coordinates]),
-            min([pt[1] for pt in path.coordinates]),
-            max([pt[0] for pt in path.coordinates]),
-            max([pt[1] for pt in path.coordinates]))
-            
-        trip = Trip(trip_id, route_name, headsign, str(carpool.deeplink), carpool.departureDate, carpool.departureTime, carpool.path, carpool.agency, carpool.lastUpdated, stop_times, carpool.driver, carpool.additional_ridesharing_info, bbox)
-
-        return trip
 
     def _trip_id(self, carpool):
         return f"{carpool.agency}:{carpool.id}"
